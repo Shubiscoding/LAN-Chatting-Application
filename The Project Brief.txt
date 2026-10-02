@@ -1,0 +1,82 @@
+﻿The Project Brief
+
+
+UI
+1. Login
+   1. Include the following fields:
+      1. Username/User ID
+      2. Password
+   2. Include a Login button.
+   3. Validate the entered credentials using the backend's isLogin() function.
+   4. Display an appropriate error message for invalid credentials.
+   5. Provide an option to navigate to the Registration Page.
+   6. Keep the UI clean, consistent, and visually appealing.
+2. Registration
+   1. Include the following fields:
+      1. Username
+      2. Password
+      3. Profile picture
+   2. Include a Register button.
+   3. Validate the input fields before registration.
+   4. Check whether the username/User ID already exists using the backend.
+   5. Create a Profile object using the entered details.
+   6. Save the profile information in profile.dat according to the file-system design.
+   7. Display a success or error message after registration.
+   8. Provide an option to return to the Login Page.
+3. Main UI
+   1. The UI should be dynamic, meaning contacts and chats should be added or removed without manually modifying the layout.
+   2. Add Contact: Create and display a contact block on the left side.
+   3. Add Chat: Create and display a chat block on the right side when a contact is selected.
+   4. Load contacts from contactList.dat and display their usernames and profile pictures.
+   5. Load the current user's profile from profile.dat and display:
+      1. Username
+      2. Profile picture
+      3. Other available profile information
+   6. Load previous messages from saveChats.dat when a contact is selected.
+   7. Include a message input field and a Send button.
+   8. Ensure that the UI updates automatically when:
+      1. A new contact is added.
+      2. A different contact is selected.
+      3. A new message is received.
+Maintain a consistent and visually appealing design.
+Database Connectivity
+1. StartSql() — Establishes a connection with the SQL database.
+2. LoadIds() — Loads all registered user IDs into an ArrayList.
+3. isLogin() — Returns a boolean indicating whether the given user ID and password are valid.
+4. RegisterUser() — Registers a new user by storing their ID, username, and password in the database.
+5. UserExists() — Checks whether a user with the given ID already exists.
+6. GetUsername() — Retrieves the username associated with a specific user ID.
+7. GetUserId() — Retrieves the user ID associated with a specific username.
+8. UpdatePassword() — Updates the password of an existing user.
+9. DeleteUser() — Removes a user’s account from the database.
+10. CloseSql() — Closes the SQL connection and releases database resources. 
+
+
+File system
+1. LoadWaitingMessages()
+   * Returns ArrayList<Message>.
+   * Reads waiting.dat and loads all pending messages when the server starts.
+   * Message contains messageId, senderId, receiverId, and message.
+   * Clears or rewrites the file after successful message delivery.
+2. LoadContacts()
+   * Returns ArrayList<Profile>.
+   * Reads contactList.dat and loads the user's saved contacts.
+   * Profile contains id, username, and profilePicture.
+3. LoadMessages()
+   * Returns HashMap<Integer, ArrayList<Message>>.
+   * Reads saveChats.dat, which stores the conversation history.
+   * The key represents the contact ID, and the ArrayList<Message> contains the messages exchanged.
+   * Uses ObjectInputStream to load the serialized HashMap.
+4. LoadProfile()
+   * Returns a Profile object.
+   * Reads profile.dat and loads the current user's profile information.
+5. WriteContacts()
+   * Takes ArrayList<Profile> as input.
+   * Updates contactList.dat whenever contacts are added or removed.
+6. WriteMessage()
+   * Takes contactId and Message as input.
+   * Loads the existing HashMap, adds the message to the relevant contact's conversation, and rewrites saveChats.dat.
+7. FileManager
+   * All file-handling functions will initially be implemented in a single class.
+   * Uses ObjectInputStream and ObjectOutputStream for reading and writing serialized Java objects.
+File-writing operations should eventually be synchronized to prevent simultaneous writes from multiple clients.
