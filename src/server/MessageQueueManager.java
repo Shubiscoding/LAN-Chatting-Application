@@ -7,41 +7,19 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Server-side message queue manager.
- * Stores messages for offline users as JSON files in the queued_messages/ directory.
- * When a user comes online, their queued messages are delivered and the file is cleared.
- *
- * JSON format per file (e.g. queued_messages/102.json):
- * [
- *   { "senderId": 101, "receiverId": 102, "message": "Hello!", "timestamp": "2026-10-02T14:30:15" },
- *   ...
- * ]
- *
- * All methods are synchronized to prevent race conditions from multiple ServerClientHandler threads.
- */
 public class MessageQueueManager {
 
     private static final String QUEUE_DIR = "queued_messages";
-    private static final DateTimeFormatter TIMESTAMP_FMT =
-            DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
+    private static final DateTimeFormatter TIMESTAMP_FMT = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
 
-    /**
-     * Initializes the queued_messages/ directory.
-     * Call this once on server startup.
-     */
     public static void init() {
         File dir = new File(QUEUE_DIR);
         if (!dir.exists()) {
             dir.mkdirs();
-            System.out.println("[Q] Created queued_messages/ directory");
+            System.out.println("Created queued_messages/ directory");
         }
     }
 
-    /**
-     * Queues a message for an offline user.
-     * Appends to the receiver's JSON file (e.g. queued_messages/102.json).
-     */
     public static synchronized void queueMessage(Message msg) {
         int receiverId = msg.getReceiverId();
         File file = getQueueFile(receiverId);
@@ -49,15 +27,14 @@ public class MessageQueueManager {
         // Read existing entries
         String existingJson = readFileContent(file);
 
-        // Build the new JSON entry
+        // Build new JSON entry
         String timestamp = LocalDateTime.now().format(TIMESTAMP_FMT);
         String entry = buildJsonEntry(msg.getSenderId(), msg.getReceiverId(),
                 escapeJson(msg.getString()), timestamp);
 
         // Append to existing array or create new one
         String updatedJson;
-        if (existingJson != null && existingJson.trim().startsWith("[")
-                && existingJson.trim().length() > 2) {
+        if (existingJson != null && existingJson.trim().startsWith("[") && existingJson.trim().length() > 2) {
             // Remove trailing ] and append new entry
             String trimmed = existingJson.trim();
             trimmed = trimmed.substring(0, trimmed.length() - 1).trim();
@@ -68,19 +45,14 @@ public class MessageQueueManager {
                 updatedJson = trimmed + ",\n  " + entry + "\n]";
             }
         } else {
-            // New file — create fresh array
             updatedJson = "[\n  " + entry + "\n]";
         }
 
         writeFileContent(file, updatedJson);
-        System.out.println("    [Q] Queued message from " + msg.getSenderId()
+        System.out.println("Queued message from " + msg.getSenderId()
                 + " for offline user " + receiverId);
     }
 
-    /**
-     * Returns all queued messages for the given user.
-     * Parses the JSON file and reconstructs Message objects.
-     */
     public static synchronized List<Message> getQueuedMessages(int userId) {
         List<Message> messages = new ArrayList<>();
         File file = getQueueFile(userId);
@@ -90,8 +62,7 @@ public class MessageQueueManager {
         String json = readFileContent(file);
         if (json == null || json.trim().isEmpty()) return messages;
 
-        // Parse JSON array manually
-        // Each entry looks like: { "senderId": X, "receiverId": Y, "message": "...", "timestamp": "..." }
+        // Format for reference: { "senderId": X, "receiverId": Y, "message": "Hi", "timestamp": "..." }
         try {
             String trimmed = json.trim();
             if (!trimmed.startsWith("[") || !trimmed.endsWith("]")) return messages;
@@ -119,35 +90,24 @@ public class MessageQueueManager {
                 }
             }
         } catch (Exception e) {
-            System.out.println("[Q] Error parsing queue file for user " + userId + ": " + e.getMessage());
+            System.out.println("Error parsing queue file for user " + userId + ": " + e.getMessage());
         }
 
         return messages;
     }
 
-    /**
-     * Clears all queued messages for the given user.
-     * Deletes the JSON file.
-     */
     public static synchronized void clearQueue(int userId) {
         File file = getQueueFile(userId);
         if (file.exists()) {
             file.delete();
-            System.out.println("    [Q] Cleared message queue for user " + userId);
+            System.out.println("Cleared message queue for user " + userId);
         }
     }
 
-    /**
-     * Checks if a user has any queued messages.
-     */
     public static synchronized boolean hasQueuedMessages(int userId) {
         File file = getQueueFile(userId);
         return file.exists() && file.length() > 2; // more than just "[]"
     }
-
-    // ══════════════════════════════════════════
-    //  PRIVATE HELPERS
-    // ══════════════════════════════════════════
 
     private static File getQueueFile(int userId) {
         return new File(QUEUE_DIR + File.separator + userId + ".json");
@@ -229,6 +189,7 @@ public class MessageQueueManager {
         return unescapeJson(sb.toString());
     }
 
+    // Read function (very important)
     private static String readFileContent(File file) {
         if (!file.exists()) return null;
 
@@ -245,6 +206,7 @@ public class MessageQueueManager {
         }
     }
 
+    // Write function (very important)
     private static void writeFileContent(File file, String content) {
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(file))) {
             writer.write(content);

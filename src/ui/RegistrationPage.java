@@ -27,7 +27,6 @@ public class RegistrationPage extends JFrame implements ActionListener {
     private final int port;
 
     // ---------- Components ----------
-    private JTextField userIdField;
     private JTextField usernameField;
     private JPasswordField passwordField;
     private JButton registerButton;
@@ -125,26 +124,11 @@ public class RegistrationPage extends JFrame implements ActionListener {
         gbc.gridy = row++;
         panel.add(subheading, gbc);
 
-        // ----- User ID -----
-        JLabel userIdLabel = new JLabel("User ID (number)");
-        userIdLabel.setFont(new Font("SansSerif", Font.PLAIN, 14));
-        gbc.gridy = row++;
-        gbc.insets = new Insets(18, 10, 4, 10);
-        panel.add(userIdLabel, gbc);
-
-        userIdField = new JTextField(20);
-        userIdField.setFont(new Font("SansSerif", Font.PLAIN, 14));
-        userIdField.setPreferredSize(new Dimension(280, 35));
-        userIdField.setBorder(new LineBorder(MAIN_GREEN, 1));
-        gbc.gridy = row++;
-        gbc.insets = new Insets(0, 10, 6, 10);
-        panel.add(userIdField, gbc);
-
         // ----- Username -----
         JLabel usernameLabel = new JLabel("Username");
         usernameLabel.setFont(new Font("SansSerif", Font.PLAIN, 14));
         gbc.gridy = row++;
-        gbc.insets = new Insets(8, 10, 4, 10);
+        gbc.insets = new Insets(18, 10, 4, 10);
         panel.add(usernameLabel, gbc);
 
         usernameField = new JTextField(20);
@@ -232,26 +216,10 @@ public class RegistrationPage extends JFrame implements ActionListener {
 
     // Called when the user clicks REGISTER
     private void handleRegister() {
-        String userIdStr = userIdField.getText().trim();
         String username = usernameField.getText().trim();
         String password = new String(passwordField.getPassword()).trim();
 
         // Validate inputs
-        if (userIdStr.isEmpty()) {
-            JOptionPane.showMessageDialog(this, "Please enter a User ID.",
-                    "Registration Error", JOptionPane.ERROR_MESSAGE);
-            return;
-        }
-
-        int userId;
-        try {
-            userId = Integer.parseInt(userIdStr);
-        } catch (NumberFormatException e) {
-            JOptionPane.showMessageDialog(this, "User ID must be a number.",
-                    "Registration Error", JOptionPane.ERROR_MESSAGE);
-            return;
-        }
-
         if (username.isEmpty()) {
             JOptionPane.showMessageDialog(this, "Please enter a username.",
                     "Registration Error", JOptionPane.ERROR_MESSAGE);
@@ -283,8 +251,7 @@ public class RegistrationPage extends JFrame implements ActionListener {
                 Receiver receiver = new Receiver(socket);
 
                 // Send registration request
-                Message regRequest = new Message(
-                        "REGISTER:" + userId + ":" + username + ":" + password);
+                Message regRequest = new Message("REGISTER:" + username + ":" + password);
                 sender.sendMessage(regRequest);
 
                 // Wait for server response
@@ -308,7 +275,7 @@ public class RegistrationPage extends JFrame implements ActionListener {
                     SwingUtilities.invokeLater(() -> {
                         JOptionPane.showMessageDialog(this,
                                 "Registration successful! Welcome, " + uname
-                                        + ".\nYou can now login with your User ID and password.",
+                                        + ".\nYou can now login with your username and password.",
                                 "Success", JOptionPane.INFORMATION_MESSAGE);
                         goToLogin();
                     });
@@ -341,10 +308,9 @@ public class RegistrationPage extends JFrame implements ActionListener {
 
     // Called when the Clear button is pressed
     private void handleClear() {
-        userIdField.setText("");
         usernameField.setText("");
         passwordField.setText("");
-        userIdField.requestFocus();
+        usernameField.requestFocus();
     }
 
     // Navigate back to LoginPage

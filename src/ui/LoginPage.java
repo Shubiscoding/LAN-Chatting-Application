@@ -32,7 +32,7 @@ public class LoginPage extends JFrame implements ActionListener {
     private final int port;
 
     // ---------- Components that we need to access in multiple methods ----------
-    private JTextField userIdField;
+    private JTextField usernameField;
     private JPasswordField passwordField;
     private JButton loginButton;
     private JButton clearButton;
@@ -148,21 +148,21 @@ public class LoginPage extends JFrame implements ActionListener {
         gbc.gridy = row++;
         panel.add(subheading, gbc);
 
-        // ----- User ID label -----
-        JLabel userIdLabel = new JLabel("User ID");
+        // ----- Username label -----
+        JLabel userIdLabel = new JLabel("Username");
         userIdLabel.setFont(new Font("SansSerif", Font.PLAIN, 14));
         gbc.gridy = row++;
         gbc.insets = new Insets(20, 10, 4, 10);
         panel.add(userIdLabel, gbc);
 
-        // ----- User ID field -----
-        userIdField = new JTextField(20);
-        userIdField.setFont(new Font("SansSerif", Font.PLAIN, 14));
-        userIdField.setPreferredSize(new Dimension(280, 35));
-        userIdField.setBorder(new LineBorder(MAIN_GREEN, 1));
+        // ----- Username field -----
+        usernameField = new JTextField(20);
+        usernameField.setFont(new Font("SansSerif", Font.PLAIN, 14));
+        usernameField.setPreferredSize(new Dimension(280, 35));
+        usernameField.setBorder(new LineBorder(MAIN_GREEN, 1));
         gbc.gridy = row++;
         gbc.insets = new Insets(0, 10, 8, 10);
-        panel.add(userIdField, gbc);
+        panel.add(usernameField, gbc);
 
         // ----- Password label -----
         JLabel passwordLabel = new JLabel("Password");
@@ -258,23 +258,12 @@ public class LoginPage extends JFrame implements ActionListener {
     // Called when the user tries to log in
     private void handleLogin() {
 
-        String userIdStr = userIdField.getText().trim();
+        String username = usernameField.getText().trim();
         String password = new String(passwordField.getPassword()).trim();
 
-        if (userIdStr.isEmpty()) {
+        if (username.isEmpty()) {
             JOptionPane.showMessageDialog(this,
-                    "Please enter your User ID.",
-                    "Login Error",
-                    JOptionPane.ERROR_MESSAGE);
-            return;
-        }
-
-        int userId;
-        try {
-            userId = Integer.parseInt(userIdStr);
-        } catch (NumberFormatException e) {
-            JOptionPane.showMessageDialog(this,
-                    "User ID must be a number.",
+                    "Please enter your username.",
                     "Login Error",
                     JOptionPane.ERROR_MESSAGE);
             return;
@@ -300,7 +289,7 @@ public class LoginPage extends JFrame implements ActionListener {
                 Receiver receiver = new Receiver(socket);
 
                 // Send login request as a protocol message
-                Message loginRequest = new Message("LOGIN:" + userId + ":" + password);
+                Message loginRequest = new Message("LOGIN:" + username + ":" + password);
                 sender.sendMessage(loginRequest);
 
                 // Wait for server response
@@ -311,8 +300,8 @@ public class LoginPage extends JFrame implements ActionListener {
                     // Parse response: AUTH_OK:userId:username
                     String[] parts = result.split(":", 3);
                     int id = Integer.parseInt(parts[1]);
-                    String username = parts[2];
-                    Profile profile = new Profile(id, username, "");
+                    String uname = parts[2];
+                    Profile profile = new Profile(id, uname, "");
 
                     // Set up user-specific data directory and save profile
                     FileManager.setDataDir("data/user_" + id + "/");
@@ -353,11 +342,10 @@ public class LoginPage extends JFrame implements ActionListener {
         }).start();
     }
 
-    // Called when the Clear button is pressed
     private void handleClear() {
-        userIdField.setText("");
+        usernameField.setText("");
         passwordField.setText("");
-        userIdField.requestFocus(); // put cursor back in user ID field
+        usernameField.requestFocus();
     }
 
     // Navigate to Registration page

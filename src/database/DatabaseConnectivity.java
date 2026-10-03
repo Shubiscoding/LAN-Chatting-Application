@@ -5,9 +5,8 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 
 public class DatabaseConnectivity {
     private Connection connection;
@@ -43,45 +42,59 @@ public class DatabaseConnectivity {
         }
     }
 
-    public boolean RegisterUser(int userId, String username, String password) {
+    /**
+     * Registers a new user with an auto-assigned ID.
+     * @return the generated userId on success, -1 on failure
+     */
+    public int RegisterUser(String username, String password) {
 
         try {
-            String query = "INSERT INTO users (id, username, password) VALUES (?, ?, ?)";
+            String query = "INSERT INTO users (username, password) VALUES (?, ?)";
 
-            PreparedStatement ps = connection.prepareStatement(query);
+            PreparedStatement ps = connection.prepareStatement(query, Statement.RETURN_GENERATED_KEYS);
 
-            ps.setInt(1, userId);
-            ps.setString(2, username);
-            ps.setString(3, password);
+            ps.setString(1, username);
+            ps.setString(2, password);
 
             ps.executeUpdate();
 
-            return true;
+            ResultSet keys = ps.getGeneratedKeys();
+            if (keys.next()) {
+                return keys.getInt(1);
+            }
 
         } catch (SQLException e) {
             e.printStackTrace();
-            return false;
         }
+
+        return -1;
     }
 
-    public boolean isLogin(int userId, String password) {
+    /**
+     * Validates login by username + password.
+     * @return the userId on success, -1 on failure
+     */
+    public int isLoginByUsername(String username, String password) {
 
         try {
-            String query = "SELECT id FROM users WHERE id = ? AND password = ?";
+            String query = "SELECT id FROM users WHERE username = ? AND password = ?";
 
             PreparedStatement ps = connection.prepareStatement(query);
 
-            ps.setInt(1, userId);
+            ps.setString(1, username);
             ps.setString(2, password);
 
             ResultSet rs = ps.executeQuery();
 
-            return rs.next();
+            if (rs.next()) {
+                return rs.getInt("id");
+            }
 
         } catch (SQLException e) {
             e.printStackTrace();
-            return false;
         }
+
+        return -1;
     }
 
     public String GetUsername(int userId) {

@@ -4,13 +4,7 @@ import shared.*;
 import ui.*;
 import javax.swing.SwingUtilities;
 
-/**
- * Client-side message handler.
- * Runs on a background thread, continuously listening for incoming messages.
- * Routes chat messages to the UI and handles protocol responses from the server.
- */
 public class ClientHandler implements Runnable {
-
     private final Sender sender;
     private final WindowApplication winApp;
     private final Receiver receiver;
@@ -28,7 +22,6 @@ public class ClientHandler implements Runnable {
             Message message = receiver.receiveMessage();
 
             if (message == null) {
-                // Connection lost
                 running = false;
                 break;
             }
@@ -42,10 +35,6 @@ public class ClientHandler implements Runnable {
         }
     }
 
-    /**
-     * Handles protocol responses from the server.
-     * These include: USER_FOUND, USER_NOT_FOUND, OFFLINE notifications.
-     */
     private void handleProtocolMessage(Message message) {
         String content = message.getString();
 
@@ -71,26 +60,16 @@ public class ClientHandler implements Runnable {
         });
     }
 
-    /**
-     * Handles incoming chat messages — forwards to the UI.
-     */
     private void handleChatMessage(Message message) {
         SwingUtilities.invokeLater(() -> {
             winApp.onMessageReceived(message);
         });
     }
 
-    /**
-     * Sends a chat message to the server for routing.
-     */
     public void sendMessage(Message message) {
         sender.sendMessage(message);
     }
 
-    /**
-     * Sends a protocol message to the server (e.g., FIND_USER:123).
-     * Protocol messages use the Message(String) constructor which sets ids to -1.
-     */
     public void sendProtocolMessage(String protocolContent) {
         sender.sendMessage(new Message(protocolContent));
     }
