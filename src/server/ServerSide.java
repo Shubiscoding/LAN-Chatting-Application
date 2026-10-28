@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class ServerSide {
-    private static final int port = 5000;
+    private static final int port = 4999;
     private static final ConcurrentHashMap<Integer, ServerClientHandler> connected_clients = new ConcurrentHashMap<>();
     private static DatabaseConnectivity db;
 

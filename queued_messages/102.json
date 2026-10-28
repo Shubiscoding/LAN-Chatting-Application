@@ -1,3 +1,4 @@
 [
-  { "senderId": 101, "receiverId": 102, "message": "just so you know I kinda like you.", "timestamp": "2026-10-03T14:31:36" }
+  { "senderId": 103, "receiverId": 102, "message": "hey nigga", "timestamp": "2026-10-28T09:56:15" },
+  { "senderId": 103, "receiverId": 102, "message": "ok nigu bye", "timestamp": "2026-10-28T09:56:20" }
 ]
